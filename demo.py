@@ -212,7 +212,7 @@ imgs_path = '/media/wang/mySATA/datasets/supercomputer_choose/PROI-Patch/'+ top_
 ##################################################################################################################################
 # step 0: init
 # fig = plt.figure()
-fig = plt.figure(figsize=(20,10))
+fig = plt.figure(figsize=(12,8))
 random_indexes = [i for i in np.random.choice(fnames.shape[0], size=5, replace=False)]
 # random_indexes[min_ind] = selected_globle_ind
 for i in range(5):
@@ -224,11 +224,11 @@ for i in range(5):
     im.paste(target, box)
     draw = ImageDraw.Draw(im)
     draw.rectangle(box, outline=(0, 0, 255))     
-# fig.canvas.draw()  
+fig.canvas.draw()  
 
-draw.rectangle([0,0,400,50], outline=(255, 255, 255)) 
-draw.text((0,0),"Please select a query", fill = (255,0,0))
-fig.canvas.draw() 
+# draw.rectangle([0,0,400,50], outline=(255, 255, 255)) 
+# draw.text((0,0),"Please select a query", fill = (255,0,0))
+# fig.canvas.draw() 
 
 # step 1: prepare mouse click
 # fig = plt.figure()        
