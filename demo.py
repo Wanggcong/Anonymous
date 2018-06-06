@@ -226,18 +226,19 @@ for i in range(5):
     draw.rectangle(box, outline=(0, 0, 255))     
 fig.canvas.draw()  
 
-# draw.rectangle([0,0,400,50], outline=(255, 255, 255)) 
-# draw.text((0,0),"Please select a query", fill = (255,0,0))
-# fig.canvas.draw() 
-
 # step 1: prepare mouse click
 # fig = plt.figure()        
 fig.canvas.mpl_connect('button_press_event', on_press)
 plt.title('Hello, SYSU iSEE Lab!')
+# plt.text(0,420,"Blue: query",fontsize=15,verticalalignment="top",horizontalalignment="left",color='b')
+# plt.text(0,460,"Red: searched",fontsize=15,verticalalignment="top",horizontalalignment="left",color='r')
+# plt.text(0,500,"Green: confirmed!",fontsize=15,verticalalignment="top",horizontalalignment="left",color='g')
+plt.text(100,460,"Blue: query",fontsize=15,verticalalignment="top",horizontalalignment="left",color='b')
+plt.text(500,460,"Red: searched",fontsize=15,verticalalignment="top",horizontalalignment="left",color='r')
+plt.text(900,460,"Green: confirmed!",fontsize=15,verticalalignment="top",horizontalalignment="left",color='g')
 plt.axis('off')
 plt.imshow(im)
 
- 
 
 print('初始化完成。请单击鼠标选择待查询图片（蓝色框） ...')
 plt.show()
