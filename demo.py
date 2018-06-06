@@ -28,30 +28,47 @@ def on_press(event):
 
     # fig.canvas.mpl_disconnect(cid)
     draw = ImageDraw.Draw(im)
-    draw.rectangle([box_selected[0], box_selected[1], box_selected[0]+resize_h, box_selected[1]+resize_w], outline=(255, 0, 0))
+    draw.rectangle([box_selected[0], box_selected[1], box_selected[0]+resize_h, box_selected[1]+resize_w], outline=(0, 255, 0))
     print('min_ind:',min_ind)
     plt.imshow(im)
     fig.canvas.draw()
 
-    # cid = fig.canvas.mpl_connect('button_press_event', on_press)
+    # step 4: compute top k, compared with other cameras 
+    selected_globle_ind = random_indexes[min_ind]   
+    feat = features[selected_globle_ind,:] 
+    print('feat.shape:',feat.shape)
 
-    
-    # plt.close()
-    # fig = plt.figure()
-    # plt.imshow(im)
-    # plt.show()
+    for i in range(9):
+        ch = top_points_rela_path[i]
+        features_ch = features_dict[ch] 
+        
+        dis_ch = np.sum((feat - features_ch)**2, axis=1)
 
-    # for i in range(5):
-    #     im.paste(cropedIm, (row1_h[i], row1_w[i]))
 
-    # step 4: compute top k, compared with other cameras    
-    
+        print('(feat - features_ch) shape:',(feat - features_ch).shape)
+        print('dis_ch shape:',dis_ch.shape)
+        print('dis_ch:',dis_ch)
+        print('dis_ch min:',np.min(dis_ch))
 
-    # step 5: show     
-    
+        dis_sort = np.argsort(dis_ch, axis=0)
+        print('dis_sort shape:',dis_sort.shape)
 
-    # step 6: select which one  and compute which center, show green boxes    
-    
+        for j in range(5):
+            ind = dis_sort[j]             ###################################
+            img_path = '/media/wang/mySATA/datasets/supercomputer_choose/PROI-Patch/'+ ch +'/'+fnames_dict[ch][ind]
+            print('img_path:',img_path)
+            search_img = Image.open(img_path)
+            search_img = search_img.resize((resize_h, resize_w))
+            top = top_points[i][j]
+            box = [top[0],top[1],top[0]+resize_h,top[1]+resize_w]
+            im.paste(search_img, box)
+            draw = ImageDraw.Draw(im)
+            draw.rectangle([box[0], box[1], box[0]+resize_h, box[1]+resize_w], outline=(255, 0, 0))              
+    plt.imshow(im)
+    fig.canvas.draw()
+
+
+    # step 5: select which one  and compute which center, show green boxes    
 
     # reset
 
@@ -127,9 +144,26 @@ top_points = top_points_r + top_points_l
 features = np.load('demo-features/features/ch02/features.npy')
 fnames = np.load('demo-features/features/ch02/fnames.npy')
 
-top_points_l_rela_path = ['ch03','ch26','ch24','ch30','ch22']  # from floor 5 to floor 1, lift
-top_points_r_rela_path = ['ch27','ch16','ch08','ch02','ch18']  # from floor 5 to floor 1, east
+
+
+
+# top_points_l_rela_path = ['ch03','ch26','ch24','ch30','ch22']  # from floor 5 to floor 1, lift
+# top_points_r_rela_path = ['ch27','ch16','ch08','ch02','ch18']  # from floor 5 to floor 1, east
+
+top_points_l_rela_path = ['ch02','ch02','ch02','ch02','ch02']  # from floor 5 to floor 1, lift
+top_points_r_rela_path = ['ch02','ch02','ch02','ch02','ch02']  # from floor 5 to floor 1, east
+
 top_points_rela_path = top_points_r_rela_path + top_points_l_rela_path
+
+
+
+features_dict = {}  
+fnames_dict = {}  
+for i in range(9):
+    ch = top_points_rela_path[i]
+    features_dict[ch] = np.load('demo-features/features/'+ch+'/features.npy')
+    fnames_dict[ch] = np.load('demo-features/features/'+ch+'/fnames.npy')
+
 
 center_points = []
 for i in range(10):
@@ -142,52 +176,30 @@ for i in range(10):
 print('wgc**************************************************')
 # visual 
 imgs_path = '/media/wang/mySATA/datasets/supercomputer_choose/PROI-Patch/'+ top_points_l_rela_path[4]
-features = np.load('demo-features/features/' + top_points_l_rela_path[4] + '/features.npy')
-floor_root = np.load('demo-features/features/' + top_points_l_rela_path[4] + '/fnames.npy')
+# features = np.load('demo-features/features/' + top_points_l_rela_path[4] + '/features.npy')
+# floor_root = np.load('demo-features/features/' + top_points_l_rela_path[4] + '/fnames.npy')
 
 # step 1: show building
 
 # step 2: show paste floor 1
-random_indexes = np.random.choice(floor_root.shape[0], size=5, replace=False)
+random_indexes = np.random.choice(fnames.shape[0], size=5, replace=False)
 # im.close()
 for i in range(5):
     top = top_points[9][i]
-    target_path = imgs_path+'/'+floor_root[random_indexes[i]]
+    target_path = imgs_path+'/'+fnames[random_indexes[i]]
     target = Image.open(target_path)
     target = target.resize((resize_h, resize_w))
     box = [top[0],top[1],top[0]+resize_h,top[1]+resize_w]
     im.paste(target, box)
-    # draw = ImageDraw.Draw(im)
-    # draw.rectangle([box[0], box[1], box[0]+resize_h, box[1]+resize_w], outline=(255, 0, 0))    
+    draw = ImageDraw.Draw(im)
+    draw.rectangle([box[0], box[1], box[0]+resize_h, box[1]+resize_w], outline=(255, 0, 0))    
 fig = plt.figure()
-# plt.imshow(im, animated= True)
-
-# im.show()
-
-# def draw_bb(data_gen):
-#     print('Drawing beginning!')
-#     box_selected= data_gen
-#     draw = ImageDraw.Draw(im)
-#     draw.rectangle([box_selected[0], box_selected[1], box_selected[0]+resize_h, box_selected[1]+resize_w], outline=(255, 0, 0))
-#     print('Drawing finished!')
-#     return draw
-
-# def data_gen():
-#     print(' I am in!')
-#     return iter(global_box_selected)
 
 
 # step 3: select which one  and compute which center, show green boxes
-# draw.rectangle([x1, y1, x2, y2], outline=(255, 0, 0))
-# cid = fig.canvas.mpl_connect('button_press_event', on_press)
 fig.canvas.mpl_connect('button_press_event', on_press)
 plt.imshow(im)
-# ani = animation.FuncAnimation(fig, draw_bb, data_gen, blit=True, interval=20, repeat=False)
-
-# plt.plot()
 plt.show()
-# plt.hold(True)
-# plt.plot()
 print('hi, friends!')
 
 
