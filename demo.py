@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+# -*- coding:UTF-8 -*-
 import matplotlib.pyplot as plt
 from PIL import Image, ImageDraw
 import numpy as np
@@ -24,16 +26,17 @@ cam_status = [0,0,0,0,0,0,0,0,0,1]
 # which_camera = -1
 def on_press(event):
     if event.inaxes == None:
-        print("none")
-    print("my position:" ,event.button,event.xdata, event.ydata)
+        print("单击超出范围，请重新单击鼠标...")
+    # print("请单击鼠标选择待查询图片或依次选择目标ID...")
+    # print("my position:" ,event.button,event.xdata, event.ydata)
     ##################################################################################################################################
     # step 2: select which one  and compute which center, show green boxes
-    print('center_points:',center_points)
+    # print('center_points:',center_points)
     which_camera, rank_k = mouse_detect(event.xdata, event.ydata,center_points)
     global cam_status
     cam_status[which_camera] = 1
-    print('which_camera:',which_camera)
-    print('rank_k:',rank_k)
+    # print('which_camera:',which_camera)
+    # print('rank_k:',rank_k)
     click_box = [event.xdata, event.ydata]
     min_ind = rank_k
     top_selected = top_points[which_camera][min_ind]
@@ -47,6 +50,7 @@ def on_press(event):
     fig.canvas.draw()    
     # global which_camera
     if which_camera == 9:
+        # print('待查询图片. 请依次选择目标ID ...')
         cam_status = [0,0,0,0,0,0,0,0,0,1]
         global random_indexes
         selected_globle_ind = random_indexes[min_ind]   
@@ -75,7 +79,7 @@ def on_press(event):
             features_ch = features_dict[ch] 
             dis_ch = np.sum((feat - features_ch)**2, axis=1)
             dis_sort = np.argsort(dis_ch, axis=0)
-            print('dis_ch[dis_sort[0]] :',dis_ch[dis_sort[0]] )  
+            # print('dis_ch[dis_sort[0]] :',dis_ch[dis_sort[0]])  
             # if dis_ch[dis_sort[0]] < 0.5:
             for j in range(5):
                 ind = dis_sort[j]             ###################################
@@ -97,12 +101,12 @@ def on_press(event):
         # select one candicate
         draw = ImageDraw.Draw(im)
         draw.rectangle(box_selected, outline=(0, 255, 0))
-        print('min_ind:',min_ind)
+        # print('min_ind:',min_ind)
         plt.imshow(im)
         fig.canvas.draw()
         which_camera = -1
     # else:
-    #     pass    
+    #     print('继续选择目标ID或者重新更新待查询图片 ...')   
     ##################################################################################################################################
     # step 5: Visual trajectories
     x_l1,x_l2 = 600, 118
@@ -126,12 +130,17 @@ def on_press(event):
             draw.ellipse((cam_r0[0],cam_r0[1]+i*cam_r_thelta,cam_r0[2],cam_r0[3]+i*cam_r_thelta),fill = (255, 0, 0))  
     plt.imshow(im)
     fig.canvas.draw()
-
+    if which_camera != 9 and which_camera != -1:
+        print('锁定目标ID在摄像机：'+str(which_camera))
+    # else:
+    #     print('请进一步筛选和确定目标ID...')
+    print('筛选目标ID或更新待查询ID ...') 
+    print('*******************************************************')
 im_path = '/home/wang/projects/super-computer/school2.JPG';
 im = Image.open(im_path)
 width, height = im.size
-print(im.size, width, height) # 宽高
-print(im.format, im.format_description) # 格式，以及格式的详细描述
+# print(im.size, width, height) # 宽高
+# print(im.format, im.format_description) # 格式，以及格式的详细描述
 
 # (w, h)
 row1_h = [200]
@@ -215,7 +224,11 @@ for i in range(5):
     im.paste(target, box)
     draw = ImageDraw.Draw(im)
     draw.rectangle(box, outline=(0, 0, 255))     
-fig.canvas.draw()  
+# fig.canvas.draw()  
+
+draw.rectangle([0,0,400,50], outline=(255, 255, 255)) 
+draw.text((0,0),"Please select a query", fill = (255,0,0))
+fig.canvas.draw() 
 
 # step 1: prepare mouse click
 # fig = plt.figure()        
@@ -223,7 +236,11 @@ fig.canvas.mpl_connect('button_press_event', on_press)
 plt.title('Hello, SYSU iSEE Lab!')
 plt.axis('off')
 plt.imshow(im)
+
+ 
+
+print('初始化完成。请单击鼠标选择待查询图片（蓝色框） ...')
 plt.show()
-print('hi, friends!')
+print('Welcome back!')
 
 
