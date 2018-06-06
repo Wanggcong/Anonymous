@@ -73,19 +73,24 @@ def on_press(event):
             dis_ch = np.sum((feat - features_ch)**2, axis=1)
             dis_sort = np.argsort(dis_ch, axis=0)
             print('dis_ch[dis_sort[0]] :',dis_ch[dis_sort[0]] )  
-            if dis_ch[dis_sort[0]] < 0.5:
-                for j in range(5):
-                    ind = dis_sort[j]             ###################################
-                    img_path = '/media/wang/mySATA/datasets/supercomputer_choose/PROI-Patch/'+ ch +'/'+fnames_dict[ch][ind]
-                    # print('img_path:',img_path)
-                    search_img = Image.open(img_path)
-                    search_img = search_img.resize((resize_h, resize_w))
-                    top = top_points[i][j]
-                    box = [top[0],top[1],top[0]+resize_h,top[1]+resize_w]
-                    im.paste(search_img, box)
-                    draw = ImageDraw.Draw(im)
+            # if dis_ch[dis_sort[0]] < 0.5:
+            for j in range(5):
+                ind = dis_sort[j]             ###################################
+                img_path = '/media/wang/mySATA/datasets/supercomputer_choose/PROI-Patch/'+ ch +'/'+fnames_dict[ch][ind]
+                # print('img_path:',img_path)
+                search_img = Image.open(img_path)
+                search_img = search_img.resize((resize_h, resize_w))
+                top = top_points[i][j]
+                box = [top[0],top[1],top[0]+resize_h,top[1]+resize_w]
+                im.paste(search_img, box)
+                draw = ImageDraw.Draw(im)
+                if dis_ch[ind] < 0.5:
                     draw.rectangle(box, outline=(255, 0, 0))              
-        
+                else:
+                    # draw.rectangle(box, fill=(255, 0, 0))  
+                    draw.rectangle(box, outline=(255, 0, 0))  
+                    draw.line([(top[0],top[1]),(top[0]+resize_h,top[1]+resize_w)], fill=(255, 0, 0))  
+                    draw.line([(top[0],top[1]+resize_w),(top[0]+resize_h,top[1])], fill=(255, 0, 0))  
         # select one candicate
         draw = ImageDraw.Draw(im)
         draw.rectangle(box_selected, outline=(0, 255, 0))
