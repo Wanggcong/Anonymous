@@ -10,6 +10,23 @@ def on_press(event):
         # fig.canvas.mpl_disconnect(cid)
         # return
     print("my position:" ,event.button,event.xdata, event.ydata)
+
+    ##################################################################################################################################
+    # step 2: show paste floor 1
+    random_indexes = np.random.choice(fnames.shape[0], size=5, replace=False)
+    # im.close()
+    for i in range(5):
+        top = top_points[9][i]
+        target_path = imgs_path+'/'+fnames[random_indexes[i]]
+        target = Image.open(target_path)
+        target = target.resize((resize_h, resize_w))
+        box = [top[0],top[1],top[0]+resize_h,top[1]+resize_w]
+        im.paste(target, box)
+        draw = ImageDraw.Draw(im)
+        draw.rectangle(box, outline=(0, 0, 255)) 
+
+    ##################################################################################################################################
+    # step 3: select which one  and compute which center, show green boxes
     click_box = [event.xdata, event.ydata]
     dis = []
     for i in range(5):
@@ -29,6 +46,7 @@ def on_press(event):
     plt.imshow(im)
     fig.canvas.draw()
 
+    ##################################################################################################################################
     # step 4: compute top k, compared with other cameras 
     selected_globle_ind = random_indexes[min_ind]   
     feat = features[selected_globle_ind,:] 
@@ -60,9 +78,11 @@ def on_press(event):
     plt.imshow(im)
     fig.canvas.draw()
 
+    ##################################################################################################################################
     # step 5: select which one  and compute which center, show green boxes    
 
-    # reset
+    ##################################################################################################################################
+    # step 6: reset
 
 im_path = '/home/wang/projects/super-computer/school2.JPG';
 im = Image.open(im_path)
@@ -141,33 +161,20 @@ for i in range(10):
 
 
 print('wgc**************************************************')
+
 # visual 
 imgs_path = '/media/wang/mySATA/datasets/supercomputer_choose/PROI-Patch/'+ top_points_l_rela_path[4]
-# features = np.load('demo-features/features/' + top_points_l_rela_path[4] + '/features.npy')
-# floor_root = np.load('demo-features/features/' + top_points_l_rela_path[4] + '/fnames.npy')
 
-# step 1: show building
-
-
-# step 2: show paste floor 1
-random_indexes = np.random.choice(fnames.shape[0], size=5, replace=False)
-# im.close()
-for i in range(5):
-    top = top_points[9][i]
-    target_path = imgs_path+'/'+fnames[random_indexes[i]]
-    target = Image.open(target_path)
-    target = target.resize((resize_h, resize_w))
-    box = [top[0],top[1],top[0]+resize_h,top[1]+resize_w]
-    im.paste(target, box)
-    draw = ImageDraw.Draw(im)
-    draw.rectangle(box, outline=(255, 0, 0))    
-fig = plt.figure()
-
-
-
-
-# step 3: select which one  and compute which center, show green boxes
+# step 1: prepare mouse click
+# fig = plt.figure()
+fig = plt.figure(figsize=(400,200)) 
 fig.canvas.mpl_connect('button_press_event', on_press)
+
+
+plt.title('Hello, SYSU iSEE Lab!')
+
+
+plt.axis('off')
 plt.imshow(im)
 plt.show()
 print('hi, friends!')
