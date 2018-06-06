@@ -19,10 +19,10 @@ def mouse_detect(x,y,center_points):
     return which_camera, rank_k
 
 random_indexes=[4,3,4,5,6]
+cam_status = [0,0,0,0,0,0,0,0,0,1]
 # flag = True
 # which_camera = -1
 def on_press(event):
-    # flag = True
     if event.inaxes == None:
         print("none")
     print("my position:" ,event.button,event.xdata, event.ydata)
@@ -30,6 +30,8 @@ def on_press(event):
     # step 2: select which one  and compute which center, show green boxes
     print('center_points:',center_points)
     which_camera, rank_k = mouse_detect(event.xdata, event.ydata,center_points)
+    global cam_status
+    cam_status[which_camera] = 1
     print('which_camera:',which_camera)
     print('rank_k:',rank_k)
     click_box = [event.xdata, event.ydata]
@@ -45,6 +47,7 @@ def on_press(event):
     fig.canvas.draw()    
     # global which_camera
     if which_camera == 9:
+        cam_status = [0,0,0,0,0,0,0,0,0,1]
         global random_indexes
         selected_globle_ind = random_indexes[min_ind]   
         feat = features[selected_globle_ind,:] 
@@ -66,7 +69,7 @@ def on_press(event):
         fig.canvas.draw()    
 
         ##################################################################################################################################
-        # step 4: compute top k, compared with other cameras 
+        # step 4: compute top k, compared with other cameras, select which one  and compute which center, show green boxes   
         for i in range(9):
             ch = top_points_rela_path[i]
             features_ch = features_dict[ch] 
@@ -98,13 +101,31 @@ def on_press(event):
         plt.imshow(im)
         fig.canvas.draw()
         which_camera = -1
-    else:
-        xxx=2    
+    # else:
+    #     pass    
     ##################################################################################################################################
-    # step 5: select which one  and compute which center, show green boxes    
+    # step 5: Visual trajectories
+    x_l1,x_l2 = 600, 118
+    x_r1,x_r2 = 760, 100
+    cam_l0 = [x_l1,x_l2,x_l1+10,x_l2+10]
+    cam_r0 = [x_r1,x_r2,x_r1+10,x_r2+10]
 
-    ##################################################################################################################################
-    # step 6: reset
+    cam_l_thelta = 40
+    cam_r_thelta = 40
+    
+    draw = ImageDraw.Draw(im)
+    for i in range(5):
+        if cam_status[i+5] == 1:
+            draw.ellipse((cam_l0[0],cam_l0[1]+i*cam_l_thelta,cam_l0[2],cam_l0[3]+i*cam_l_thelta), fill=(0, 255, 0))
+        else:
+            draw.ellipse((cam_l0[0],cam_l0[1]+i*cam_l_thelta,cam_l0[2],cam_l0[3]+i*cam_l_thelta), fill=(255, 0, 0))
+    for i in range(5):    
+        if cam_status[i] == 1:
+            draw.ellipse((cam_r0[0],cam_r0[1]+i*cam_r_thelta,cam_r0[2],cam_r0[3]+i*cam_r_thelta),fill = (0, 255, 0))    
+        else:
+            draw.ellipse((cam_r0[0],cam_r0[1]+i*cam_r_thelta,cam_r0[2],cam_r0[3]+i*cam_r_thelta),fill = (255, 0, 0))  
+    plt.imshow(im)
+    fig.canvas.draw()
 
 im_path = '/home/wang/projects/super-computer/school2.JPG';
 im = Image.open(im_path)
