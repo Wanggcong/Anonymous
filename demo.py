@@ -19,16 +19,38 @@ def mouse_detect(x,y,center_points):
                 rank_k = j
                 min_dis = dis	
     return which_camera, rank_k
+def time_compute(img_name, imgs_each_cam, which_cam):
+    if img_name[1] == '_':
+        which_img = img_name[2:10]
+    else:
+        which_img = img_name[0:8]
+    seconds = int(int(which_img)*7200/imgs_each_cam[which_cam])
+    print('which_img:',which_img)
+    print('imgs_each_cam[which_cam]:',imgs_each_cam[which_cam])
+    which_second = seconds%60
+    which_minute = (seconds-which_second)/60
+    if which_minute<60:
+        time_str = "11:"+'{:0>2}'.format(str(int(which_minute)))+':'+'{:0>2}'.format(str(int(which_second)))
+    else:
+        which_minute = which_minute-60
+        time_str = "12:"+'{:0>2}'.format(str(int(which_minute)))+':'+'{:0>2}'.format(str(int(which_second)))
+    return time_str
+
+# '{:0>2}'.format('189')
 
 
 random_index_table = [30797,1340,54006,20909,57028,38456,38417,233,28998,59096, \
 34008,26317,21014,2109,55534,44838,13156,16766,40157,53057,10086,14993, \
 28734,47083,2908,11259,17341]
+
 def my_random_indexes():
     random_indexes = [i for i in np.random.choice(random_index_table, size=5, replace=False)]
+    # random_indexes = [i for i in np.random.choice(fnames.shape[0], size=5, replace=False)]
     return random_indexes
 
-cam_status = [0,0,0,0,0,0,0,0,0,1]
+cam_status = [0,0,0,0,0,0,0,0,0,1]  # 0 indicates red, 1 for green (found!)
+time_display = [100,100,100,100,100,100,100,100,100,100]
+topk_names = []
 # flag = True
 # which_camera = -1
 def on_press(event):
@@ -40,8 +62,10 @@ def on_press(event):
     # step 2: select which one  and compute which center, show green boxes
     # print('center_points:',center_points)
     which_camera, rank_k = mouse_detect(event.xdata, event.ydata,center_points)
-    global cam_status
+    global cam_status, time_display
     cam_status[which_camera] = 1
+    # time_display[which_camera] = rank_k
+
     # print('which_camera:',which_camera)
     # print('rank_k:',rank_k)
     click_box = [event.xdata, event.ydata]
@@ -58,7 +82,11 @@ def on_press(event):
     # global which_camera
     if which_camera == 9:
         # print('待查询图片. 请依次选择目标ID ...')
+        global topk_names
+        topk_names = []
         cam_status = [0,0,0,0,0,0,0,0,0,1]
+        time_display = [100,100,100,100,100,100,100,100,100,rank_k]
+
         global random_indexes
         selected_globle_ind = random_indexes[min_ind]
         print('selected_globle_ind:',selected_globle_ind)   
@@ -69,7 +97,6 @@ def on_press(event):
         # global random_indexes
         # random_indexes = [i for i in np.random.choice(fnames.shape[0], size=5, replace=False)]
         random_indexes = my_random_indexes()
-
         random_indexes[min_ind] = selected_globle_ind
         for i in range(5):
             top = top_points[9][i]
@@ -91,9 +118,11 @@ def on_press(event):
             dis_sort = np.argsort(dis_ch, axis=0)
             # print('dis_ch[dis_sort[0]] :',dis_ch[dis_sort[0]])  
             # if dis_ch[dis_sort[0]] < 0.5:
+            chk_topk_names = []
             for j in range(5):
                 ind = dis_sort[j]             ###################################
                 img_path = '/media/wang/mySATA/datasets/supercomputer_choose/PROI-Patch/'+ ch +'/'+fnames_dict[ch][ind]
+                chk_topk_names.append(fnames_dict[ch][ind])
                 # print('img_path:',img_path)
                 search_img = Image.open(img_path)
                 search_img = search_img.resize((resize_h, resize_w))
@@ -108,6 +137,7 @@ def on_press(event):
                     draw.rectangle(box, outline=(255, 0, 0))  
                     draw.line([(top[0],top[1]),(top[0]+resize_h,top[1]+resize_w)], fill=(255, 0, 0))  
                     draw.line([(top[0],top[1]+resize_w),(top[0]+resize_h,top[1])], fill=(255, 0, 0))  
+            topk_names.append(chk_topk_names)
         # select one candicate
         draw = ImageDraw.Draw(im)
         draw.rectangle(box_selected, outline=(0, 255, 0))
@@ -115,8 +145,9 @@ def on_press(event):
         plt.imshow(im)
         fig.canvas.draw()
         which_camera = -1
-    # else:
-    #     print('继续选择目标ID或者重新更新待查询图片 ...')   
+    else:
+        if time_display[which_camera] > rank_k:
+            time_display[which_camera] = rank_k
     ##################################################################################################################################
     # step 5: Visual trajectories
     x_l1,x_l2 = 600, 118
@@ -127,7 +158,8 @@ def on_press(event):
     cam_l_thelta = 40
     cam_r_thelta = 40
     
-    draw = ImageDraw.Draw(im)
+    # draw = ImageDraw.Draw(im)
+    # light on/off
     for i in range(5):
         if cam_status[i+5] == 1:
             draw.ellipse((cam_l0[0],cam_l0[1]+i*cam_l_thelta,cam_l0[2],cam_l0[3]+i*cam_l_thelta), fill=(0, 255, 0))
@@ -138,14 +170,31 @@ def on_press(event):
             draw.ellipse((cam_r0[0],cam_r0[1]+i*cam_r_thelta,cam_r0[2],cam_r0[3]+i*cam_r_thelta),fill = (0, 255, 0))    
         else:
             draw.ellipse((cam_r0[0],cam_r0[1]+i*cam_r_thelta,cam_r0[2],cam_r0[3]+i*cam_r_thelta),fill = (255, 0, 0))  
+    # time display
+    time_locations = []
+    for i in range(5):
+        time_locations.append([center_points[i][0][0]-150,center_points[i][0][1]-20])
+    for i in range(5,10):
+        time_locations.append([center_points[i][4][0]+20,center_points[i][4][1]-10])
+
+    for i in range(9):
+        text_loc = time_locations[i]
+        box = [text_loc[0],text_loc[1],text_loc[0]+60,text_loc[1]+15]  
+        draw.rectangle(box,fill=(255,255,255))      
+        if time_display[i] <=5:          
+            print('text_loc:',text_loc)
+            img_name = topk_names[i][time_display[i]]
+            print('time_display[which_camera]:',time_display[i])
+            time_str = time_compute(img_name, imgs_each_cam, which_camera)
+            print('time_str:',time_str)
+            draw.text(text_loc,time_str,fill = (0,0,0))
     plt.imshow(im)
     fig.canvas.draw()
     if which_camera != 9 and which_camera != -1:
         print('锁定目标ID在摄像机：'+str(which_camera))
-    # else:
-    #     print('请进一步筛选和确定目标ID...')
     print('筛选目标ID或更新待查询ID ...') 
     print('*******************************************************')
+
 im_path = '/home/wang/projects/super-computer/school2.JPG';
 im = Image.open(im_path)
 width, height = im.size
@@ -202,12 +251,14 @@ top_points_r_rela_path = ['ch27','ch16','ch08','ch02','ch18']  # from floor 5 to
 
 top_points_rela_path = top_points_r_rela_path + top_points_l_rela_path
 features_dict = {}  
-fnames_dict = {}  
+fnames_dict = {}
+imgs_each_cam = []  
 for i in range(9):
     ch = top_points_rela_path[i]
     features_dict[ch] = np.load('demo-features/features/'+ch+'/features.npy')
     fnames_dict[ch] = np.load('demo-features/features/'+ch+'/fnames.npy')
-
+    imgs_each_cam.append(features_dict[ch].shape[0])
+print('imgs_each_cam:',imgs_each_cam)
 
 center_points = []
 for i in range(10):
