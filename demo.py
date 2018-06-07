@@ -184,8 +184,8 @@ def on_press(event):
         if time_display[i] <=5:          
             print('text_loc:',text_loc)
             img_name = topk_names[i][time_display[i]]
-            print('time_display[which_camera]:',time_display[i])
-            time_str = time_compute(img_name, imgs_each_cam, which_camera)
+            print('time_display[i]:',time_display[i])
+            time_str = time_compute(img_name, imgs_each_cam, i)
             print('time_str:',time_str)
             draw.text(text_loc,time_str,fill = (0,0,0))
     plt.imshow(im)
