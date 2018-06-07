@@ -20,7 +20,14 @@ def mouse_detect(x,y,center_points):
                 min_dis = dis	
     return which_camera, rank_k
 
-random_indexes=[4,3,4,5,6]
+
+random_index_table = [30797,1340,54006,20909,57028,38456,38417,233,28998,59096, \
+34008,26317,21014,2109,55534,44838,13156,16766,40157,53057,10086,14993, \
+28734,47083,2908,11259,17341]
+def my_random_indexes():
+    random_indexes = [i for i in np.random.choice(random_index_table, size=5, replace=False)]
+    return random_indexes
+
 cam_status = [0,0,0,0,0,0,0,0,0,1]
 # flag = True
 # which_camera = -1
@@ -53,13 +60,16 @@ def on_press(event):
         # print('待查询图片. 请依次选择目标ID ...')
         cam_status = [0,0,0,0,0,0,0,0,0,1]
         global random_indexes
-        selected_globle_ind = random_indexes[min_ind]   
+        selected_globle_ind = random_indexes[min_ind]
+        print('selected_globle_ind:',selected_globle_ind)   
         feat = features[selected_globle_ind,:] 
 
         ##################################################################################################################################
         # step 3: show paste floor 1
         # global random_indexes
-        random_indexes = [i for i in np.random.choice(fnames.shape[0], size=5, replace=False)]
+        # random_indexes = [i for i in np.random.choice(fnames.shape[0], size=5, replace=False)]
+        random_indexes = my_random_indexes()
+
         random_indexes[min_ind] = selected_globle_ind
         for i in range(5):
             top = top_points[9][i]
@@ -213,7 +223,8 @@ imgs_path = '/media/wang/mySATA/datasets/supercomputer_choose/PROI-Patch/'+ top_
 # step 0: init
 # fig = plt.figure()
 fig = plt.figure(figsize=(12,8))
-random_indexes = [i for i in np.random.choice(fnames.shape[0], size=5, replace=False)]
+# random_indexes = [i for i in np.random.choice(fnames.shape[0], size=5, replace=False)]
+random_indexes = my_random_indexes()
 # random_indexes[min_ind] = selected_globle_ind
 for i in range(5):
     top = top_points[9][i]
